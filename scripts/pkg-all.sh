@@ -111,8 +111,8 @@ if [[ "${CI:-}" != true ]]; then
 	exit 0
 fi
 
-git config user.name github-actions[bot]
-git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+git config user.name 'github-actions[bot]'
+git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 git add "$package/PKGBUILD" "$package/.SRCINFO"
 
 if git diff --cached --quiet; then
@@ -157,8 +157,7 @@ while IFS= read -r file; do
 done < <(git ls-files "$package")
 
 git -C "$aurdir" config user.name "${AUR_GIT_NAME:-github-actions[bot]}"
-git -C "$aurdir" config user.email \
-	"${AUR_GIT_EMAIL:-41898282+github-actions[bot]@users.noreply.github.com}"
+git -C "$aurdir" config user.email "${AUR_GIT_EMAIL:-41898282+github-actions[bot]@users.noreply.github.com}"
 git -C "$aurdir" add -A
 
 if git -C "$aurdir" diff --cached --quiet; then
