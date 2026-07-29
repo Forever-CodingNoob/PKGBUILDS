@@ -7,7 +7,7 @@ pkgdesc='The safe, sandboxed runtime for autonomous AI agents'
 arch=('x86_64' 'aarch64')
 url='https://github.com/NVIDIA/OpenShell'
 license=('Apache-2.0')
-depends=('glibc')
+depends=('glibc' 'libgcc')
 optdepends=(
   'podman'
   'docker'
@@ -75,7 +75,7 @@ package() {
     "$pkgdir/usr/bin/openshell-sandbox"
 
   install -Dm755 "$srcdir/openshell-driver-vm" \
-    "$pkgdir/usr/libexec/openshell/openshell-driver-vm"
+    "$pkgdir/usr/bin/openshell-driver-vm"
 
   install -Dm644 "$srcdir/openshell-gateway-$pkgver.service" \
     "$pkgdir/usr/lib/systemd/user/openshell-gateway.service"
