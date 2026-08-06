@@ -1,7 +1,7 @@
 # Maintainer: forvkusa <forvkusa+aur at csie dot ntu dot edu dot tw>
 
 pkgname=openshell-bin
-pkgver=0.0.98
+pkgver=0.0.99
 pkgrel=1
 pkgdesc='The safe, sandboxed runtime for autonomous AI agents'
 arch=('x86_64' 'aarch64')
@@ -51,10 +51,10 @@ source_aarch64=(
   "openshell-driver-vm-$pkgver-aarch64.tar.gz::https://github.com/NVIDIA/OpenShell/releases/download/v$pkgver/openshell-driver-vm-aarch64-unknown-linux-gnu.tar.gz"
 )
 sha256sums_aarch64=(
-  'ecc4088aa8376d0f906d65083fe69ab9cb47ad7fa363c425dd096738796cf26f'
-  '94a73574ce7c3ebb9ac733db544067e52b01a75bc2a18b7a82211d7d3a629c83'
-  '691e8ed36e1c062bbbbf053f8d35c8974f87e79497df4d26c7765da952d74616'
-  '6338c74d781c6b5df6449f213fce85b7b882779324b1068a0c202147d7f78e93'
+  'd00cbf0d8779c01ddea6453ead2ad4db3d89a1f14eb6f0785f7919f42813a279'
+  '3a5d3092ae34356beb0ff2a920f9a87af4233c7a1086a53cd9429d48358f5c09'
+  'c758e7dc2b8c904baa01e2ccce0f08daf96ede0c648478b23346d8c4dd16f432'
+  '4cb1dba9f29fec3111a7858f1bb4f9344d321ce7aa080c6e4ab0e69e8f2761fa'
 )
 
 check() {
