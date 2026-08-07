@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # The script is written by GPT-5.6 Sol. Use with caution.
 
+set -euo pipefail
+
 usage() {
 	echo "usage: ${BASH_SOURCE[0]} <package-directory>" >&2
 	exit 2
@@ -146,7 +148,10 @@ echo \
 
 export GIT_SSH_COMMAND="ssh -i $sshdir/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$sshdir/known_hosts"
 
-git clone "ssh://aur@aur.archlinux.org/$package.git" "$aurdir"
+if ! git clone "ssh://aur@aur.archlinux.org/$package.git" "$aurdir"; then
+	echo "$package: failed to clone the AUR repository" >&2
+	exit 1
+fi
 git -C "$aurdir" rm -r --ignore-unmatch --quiet -- .
 
 while IFS= read -r file; do
