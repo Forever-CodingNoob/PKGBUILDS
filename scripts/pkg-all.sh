@@ -62,7 +62,7 @@ if [[ "$ver" != "$oldver" ]]; then
 	sed -i "s|^pkgver=.*|pkgver=$ver|" "$package/PKGBUILD"
 	refresh_checksums "$ver" "$package/PKGBUILD"
 else
-	echo "$package: $ver is current"
+	echo "$package: $ver is up to date"
 fi
 
 run_makepkg() {
@@ -166,7 +166,7 @@ git -C "$aurdir" config user.email "${AUR_GIT_EMAIL:-41898282+github-actions[bot
 git -C "$aurdir" add -A
 
 if git -C "$aurdir" diff --cached --quiet; then
-	echo "$package: AUR package is current"
+	echo "$package: AUR package is up to date"
 else
 	git -C "$aurdir" commit -m "Update to $ver-$rel"
 	git -C "$aurdir" push origin HEAD:master
