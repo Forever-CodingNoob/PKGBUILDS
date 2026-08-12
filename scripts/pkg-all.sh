@@ -79,7 +79,24 @@ fi
 
 # update checksums if really needed
 if [[ "$needs_checksums" == true ]]; then
-	refresh_checksums "$ver" "$package/PKGBUILD"
+	if ((EUID == 0)); then
+		if ! id -u builder >/dev/null 2>&1; then
+			useradd --create-home builder
+		fi
+
+		chown -R builder "$package"
+
+		runuser -u builder -- bash -c '
+			set -euo pipefail
+			source "$1"
+			refresh_checksums "$2" "$3"
+		' _ \
+			"$repo_root/$package/pkg.sh" \
+			"$ver" \
+			"$repo_root/$package/PKGBUILD"
+	else
+		refresh_checksums "$ver" "$package/PKGBUILD"
+	fi
 fi
 
 run_makepkg() {
