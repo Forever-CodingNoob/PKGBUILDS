@@ -48,7 +48,7 @@ noextract=(
 sha256sums=(
   '2fcb9223b3450830d0ec6c00223365e5c7f839aa2d3951d7b2aa9eae1289b166'
   'ad8ceb2cfe687e0c106547fdd281f0d20b40688200d04f40bb163afd1f102609'
-  '54ff22816b93aa04c9690c1d9db93818759aa1267ae704b231eaa6f1119fe37b'
+  '3fc134b719410ce3f22e0af1c95b4df874ab44cabb4e0733cf31f0e2db5e9ad4'
   '22b5217b929a1d184f1f73d5f55fbef6756d5fbcef207da64f188231d38c9c20'
 )
 
@@ -67,7 +67,7 @@ prepare() {
   fi
 
   # The .dmg must bundle the same Electron major as $_electron.
-  7zz e "$dmg" \
+  7z e "$dmg" \
     "Granola/Granola.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Resources/Info.plist" \
     -ofw -y >/dev/null || { echo "cannot read the .dmg" >&2; return 1; }
   local dmgel
@@ -77,7 +77,7 @@ prepare() {
     return 1
   fi
 
-  7zz x "$dmg" "$_res/app.asar" "$_res/app.asar.unpacked" "$_res/icons" \
+  7z x "$dmg" "$_res/app.asar" "$_res/app.asar.unpacked" "$_res/icons" \
     -opayload -y >/dev/null
 
   # The npm tarball (extracted by makepkg into package/) must match the

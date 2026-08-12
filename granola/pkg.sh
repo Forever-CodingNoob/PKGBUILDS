@@ -75,8 +75,8 @@ refresh_metadata() (
 		local metadata_dir
 		local dmg_elver
 
-		if ! command -v 7zz >/dev/null; then
-			echo '7zz is required to inspect a new Granola DMG' >&2
+		if ! command -v 7z >/dev/null; then
+			echo '7z is required to inspect a new Granola DMG' >&2
 			return 1
 		fi
 
@@ -96,7 +96,7 @@ refresh_metadata() (
 		metadata_dir="$workdir/metadata"
 
 		curl -fL --retry 3 --output "$dmg" "$download_url"
-		7zz e "$dmg" \
+		7z e "$dmg" \
 			'Granola/Granola.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Resources/Info.plist' \
 			'Granola/Granola.app/Contents/Resources/app.asar.unpacked/node_modules/better-sqlite3-multiple-ciphers/package.json' \
 			"-o$metadata_dir" -y >/dev/null
