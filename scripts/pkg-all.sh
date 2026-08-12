@@ -58,11 +58,28 @@ fi
 
 echo "$package: latest upstream version is $ver"
 
+needs_checksums=false
 if [[ "$ver" != "$oldver" ]]; then
 	sed -i "s|^pkgver=.*|pkgver=$ver|" "$package/PKGBUILD"
-	refresh_checksums "$ver" "$package/PKGBUILD"
+	needs_checksums=true
 else
 	echo "$package: $ver is up to date"
+fi
+
+# update metadata where possible
+if declare -F refresh_metadata >/dev/null; then
+	metadata_hash_before="$(sha256sum "$package/PKGBUILD")"
+	refresh_metadata "$ver" "$package/PKGBUILD" "$oldver"
+	metadata_hash_after="$(sha256sum "$package/PKGBUILD")"
+
+	if [[ "$metadata_hash_after" != "$metadata_hash_before" ]]; then
+		needs_checksums=true
+	fi
+fi
+
+# update checksums if really needed
+if [[ "$needs_checksums" == true ]]; then
+	refresh_checksums "$ver" "$package/PKGBUILD"
 fi
 
 run_makepkg() {
