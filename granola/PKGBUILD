@@ -18,8 +18,10 @@ arch=('x86_64')
 url="https://www.granola.ai"
 license=('LicenseRef-proprietary')
 _electron=electron42
-_elver=42.6.1 # version of the installed $_electron package
-_bs3ver=12.9.0 #version of Granola's bundled better-sqlite3-multiple-ciphers fork
+# version of the installed $_electron package
+_elver=42.6.1
+# version of Granola's bundled better-sqlite3-multiple-ciphers fork
+_bs3ver=12.9.0
 depends=(
   "$_electron"
   'libstdc++'
