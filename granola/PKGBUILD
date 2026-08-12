@@ -2,21 +2,10 @@
 # The build file is written by Claude Fable 5. Use with caution.
 #
 # Repackages the official Granola macOS .dmg as a native Linux pacman package.
-# Based on https://github.com/tirtha4/Granola-for-Linux, rewritten so that
-# Electron and 7-Zip come from the Arch repos instead of ad-hoc downloads.
+# Based on https://github.com/tirtha4/Granola-for-Linux.
 #
 # makepkg downloads the .dmg from Granola's release CDN (the same host the
-# in-app updater uses); no manual download step is needed. To package a new
-# release, set pkgver and run updpkgsums.
-#
-# Pinned values that can drift; prepare() verifies the last two and prints
-# the correct replacement on mismatch:
-#   pkgver   - Granola release version; selects the .dmg on the CDN
-#   _elver   - version of the installed $_electron package (headers must match)
-#   _bs3ver  - version of Granola's bundled better-sqlite3-multiple-ciphers
-#              fork; only binding.gyp is taken from the npm tarball, the C++
-#              source itself ships inside the .dmg
-# After changing _elver or _bs3ver, run updpkgsums to refresh checksums.
+# in-app updater uses); no manual download step is needed.
 #
 # Format check: shfmt -ln bash -i 2 -d PKGBUILD
 # Linting: shellcheck --shell=bash --exclude=SC2034,SC2148,SC2154 PKGBUILD
@@ -29,8 +18,8 @@ arch=('x86_64')
 url="https://www.granola.ai"
 license=('LicenseRef-proprietary')
 _electron=electron42
-_elver=42.8.1
-_bs3ver=12.9.0
+_elver=42.8.1 # version of the installed $_electron package
+_bs3ver=12.9.0 #version of Granola's bundled better-sqlite3-multiple-ciphers fork
 depends=(
   "$_electron"
   'libstdc++'
