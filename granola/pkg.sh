@@ -33,22 +33,50 @@ _granola_literal() {
 	' "$pkgbuild"
 }
 
-_granola_arch_electron_version() {
+_granola_repo_electron_version() {
+	local electron="$1"
+
+	curl -fsSL --retry 3 \
+		"https://archlinux.org/packages/extra/x86_64/$electron/json/" |
+		jq -er --arg electron "$electron" '
+			select(.pkgname == $electron and .arch == "x86_64") |
+			.pkgver |
+			select(type == "string")
+		'
+}
+
+_granola_aur_electron_version() {
+	local electron="$1"
+	local package="${electron}-bin"
+
+	curl -fsSL --retry 3 --get \
+		--data-urlencode "arg[]=$package" \
+		'https://aur.archlinux.org/rpc/v5/info' |
+		jq -er --arg electron "$electron" --arg package "$package" '
+			.results[] |
+			select(.Name == $package) |
+			(.Provides // [])[] |
+			select(startswith($electron + "=")) |
+			sub("^" + $electron + "="; "")
+		'
+}
+
+_granola_electron_version() {
 	local electron="$1"
 	local version
 
-	version="$(
-		curl -fsSL \
-			"https://archlinux.org/packages/extra/x86_64/$electron/json/" |
-			jq -er --arg electron "$electron" '
-				select(.pkgname == $electron and .arch == "x86_64") |
-				.pkgver |
-				select(type == "string")
-			'
-	)"
+	if version="$(_granola_repo_electron_version "$electron" 2>/dev/null)"; then
+		:
+	elif version="$(_granola_aur_electron_version "$electron" 2>/dev/null)"; then
+		printf '%s: using AUR provider %s-bin\n' "$electron" "$electron" >&2
+	else
+		printf 'Could not find %s in Extra or %s-bin in the AUR\n' \
+			"$electron" "$electron" >&2
+		return 1
+	fi
 
 	if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-		printf 'Invalid Arch %s version: %s\n' "$electron" "$version" >&2
+		printf 'Invalid %s version: %s\n' "$electron" "$version" >&2
 		return 1
 	fi
 
@@ -131,7 +159,7 @@ refresh_metadata() (
 		return 1
 	fi
 
-	elver="$(_granola_arch_electron_version "$electron")"
+	elver="$(_granola_electron_version "$electron")"
 
 	for name in pkgver _electron _elver _bs3ver; do
 		_granola_literal "$name" "$pkgbuild" >/dev/null
@@ -143,6 +171,47 @@ refresh_metadata() (
 		-e "s|^_elver=.*|_elver=$elver|" \
 		-e "s|^_bs3ver=.*|_bs3ver=$bs3ver|" \
 		"$pkgbuild"
+)
+
+prepare_build_dependencies() (
+	local pkgbuild="$2"
+	local electron
+	local provider
+	local aurdir
+
+	electron="$(_granola_literal _electron "$pkgbuild")"
+
+	if pacman -T "$electron" >/dev/null 2>&1 ||
+		pacman -Si "$electron" >/dev/null 2>&1; then
+		return
+	fi
+
+	provider="${electron}-bin"
+	_granola_aur_electron_version "$electron" >/dev/null || {
+		printf 'Could not find AUR provider %s\n' "$provider" >&2
+		return 1
+	}
+
+	aurdir="$(mktemp -d)"
+	trap 'rm -rf "$aurdir"' EXIT
+
+	printf '%s: installing AUR provider %s\n' "$electron" "$provider"
+	git clone --depth 1 "https://aur.archlinux.org/$provider.git" "$aurdir"
+
+	if ((EUID == 0)); then
+		chown -R builder:builder "$aurdir"
+		runuser -u builder -- env -i \
+			HOME=/home/builder \
+			LANG=C.UTF-8 \
+			PATH=/usr/local/sbin:/usr/local/bin:/usr/bin \
+			USER=builder \
+			bash -c 'cd "$1" && makepkg --syncdeps --install --cleanbuild --clean --noconfirm'\
+			_ "$aurdir"
+	else
+		(cd "$aurdir" && \
+			env -u AUR_SSH_PRIVATE_KEY -u GH_TOKEN -u GITHUB_TOKEN \
+				makepkg --syncdeps --install --cleanbuild --clean --noconfirm)
+	fi
 )
 
 refresh_checksums() {

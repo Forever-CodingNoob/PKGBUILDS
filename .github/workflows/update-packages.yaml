@@ -58,6 +58,21 @@ jobs:
             exit 0
           fi
 
+          failures=()
           for package in "${packages[@]}"; do
-            bash scripts/pkg-all.sh "$package"
+            if bash scripts/pkg-all.sh "$package"; then
+              continue
+            else
+              status=$?
+            fi
+
+            failures+=("$package (exit $status)")
+            git restore --staged --worktree -- "$package"
+            git clean -fdx -- "$package"
           done
+
+          if ((${#failures[@]} != 0)); then
+            printf 'Failed package updates:\n' >&2
+            printf '  %s\n' "${failures[@]}" >&2
+            exit 1
+          fi

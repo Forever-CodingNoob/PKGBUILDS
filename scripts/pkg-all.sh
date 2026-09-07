@@ -77,14 +77,24 @@ if declare -F refresh_metadata >/dev/null; then
 	fi
 fi
 
+setup_builder() {
+	if ((EUID != 0)); then
+		return
+	fi
+
+	useradd --create-home builder 2>/dev/null || true
+	chown -R builder "$package"
+
+	install -dm0755 /etc/sudoers.d
+	echo 'builder ALL=(root) NOPASSWD: /usr/bin/pacman' \
+		>/etc/sudoers.d/pkgbuild-builder
+	chmod 0440 /etc/sudoers.d/pkgbuild-builder
+}
+
 # update checksums if really needed
 if [[ "$needs_checksums" == true ]]; then
 	if ((EUID == 0)); then
-		if ! id -u builder >/dev/null 2>&1; then
-			useradd --create-home builder
-		fi
-
-		chown -R builder "$package"
+		setup_builder
 
 		runuser -u builder -- bash -c '
 			set -euo pipefail
@@ -101,13 +111,7 @@ fi
 
 run_makepkg() {
 	if ((EUID == 0)); then
-		useradd --create-home builder 2>/dev/null || true
-		chown -R builder "$package"
-
-		install -dm0755 /etc/sudoers.d
-		echo 'builder ALL=(root) NOPASSWD: /usr/bin/pacman' \
-			>/etc/sudoers.d/pkgbuild-builder
-		chmod 0440 /etc/sudoers.d/pkgbuild-builder
+		setup_builder
 
 		(cd "$package" && runuser -u builder -- makepkg "$@")
 	else
@@ -125,6 +129,11 @@ else
 	fi
 
 	sed -i "s|^pkgrel=.*|pkgrel=$rel|" "$package/PKGBUILD"
+
+	if declare -F prepare_build_dependencies >/dev/null; then
+		setup_builder
+		prepare_build_dependencies "$ver" "$package/PKGBUILD"
+	fi
 
 	run_makepkg --syncdeps --cleanbuild --clean --noconfirm
 	mapfile -t built_packages < <(run_makepkg --packagelist)
