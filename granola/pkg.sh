@@ -33,6 +33,19 @@ _granola_literal() {
 	' "$pkgbuild"
 }
 
+_granola_electron() {
+        local pkgbuild="$1"
+        local elver
+
+        elver="$(_granola_literal _elver "$pkgbuild")" || return 1
+        if [[ ! "$elver" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                printf 'Invalid Electron version in PKGBUILD: %s\n' "$elver" >&2
+                return 1
+        fi
+
+        printf 'electron%s\n' "${elver%%.*}"
+}
+
 _granola_repo_electron_version() {
 	local electron="$1"
 
