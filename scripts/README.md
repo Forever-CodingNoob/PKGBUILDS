@@ -101,7 +101,7 @@ refresh_checksums() {
 | Item | Contract |
 | --- | --- |
 | Arguments | `$1` is the new version. `$2` is the path to the `PKGBUILD`. `$3` is the old version. |
-| Task | Write `pkgver` and each package-specific literal, for example `_electron` or `_elver`. |
+| Task | Write `pkgver` and each package-specific literal, for example `_bs3ver` or `_elver`. |
 | Success | Exit code 0. |
 | Failure | Exit code other than 0. The script stops and the workflow reports the package as failed. |
 | Privileges | The script runs this hook as the current user, which is root in CI. |

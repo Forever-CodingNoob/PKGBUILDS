@@ -145,7 +145,7 @@ refresh_metadata() (
 
 		electron="electron${dmg_elver%%.*}"
 	else
-		electron="$(_granola_literal _electron "$pkgbuild")"
+		electron="$(_granola_electron "$pkgbuild")"
 		bs3ver="$(_granola_literal _bs3ver "$pkgbuild")"
 	fi
 
@@ -161,13 +161,12 @@ refresh_metadata() (
 
 	elver="$(_granola_electron_version "$electron")"
 
-	for name in pkgver _electron _elver _bs3ver; do
+	for name in pkgver _elver _bs3ver; do
 		_granola_literal "$name" "$pkgbuild" >/dev/null
 	done
 
 	sed -i \
 		-e "s|^pkgver=.*|pkgver=$version|" \
-		-e "s|^_electron=.*|_electron=$electron|" \
 		-e "s|^_elver=.*|_elver=$elver|" \
 		-e "s|^_bs3ver=.*|_bs3ver=$bs3ver|" \
 		"$pkgbuild"
@@ -179,7 +178,7 @@ prepare_build_dependencies() (
 	local provider
 	local aurdir
 
-	electron="$(_granola_literal _electron "$pkgbuild")"
+	electron="$(_granola_electron "$pkgbuild")"
 
 	if pacman -T "$electron" >/dev/null 2>&1 ||
 		pacman -Si "$electron" >/dev/null 2>&1; then
